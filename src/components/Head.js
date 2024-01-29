@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleMenu } from "../utils/appSlice";
-import { VIDEO_SUGGESTION_URL } from "../utils/constants";
+import { QUERY_SEARCH_DATA, VIDEO_SUGGESTION_URL } from "../utils/constants";
 import { cacheResults } from "../utils/searchSlice";
 
 export const Head = () => {
@@ -30,7 +30,6 @@ export const Head = () => {
   }, [searchQuery]);
 
   const getAutosuggestResults = async () => {
-    console.log("searchQuery", searchQuery);
     const data = await fetch(VIDEO_SUGGESTION_URL + searchQuery);
     const jsonData = await data.json();
     setSuggestions(jsonData[1]);
@@ -41,6 +40,12 @@ export const Head = () => {
         [searchQuery]: jsonData[1],
       })
     );
+  };
+
+  const handleSearchSelect = async (suggestion) => {
+    const searchData = await fetch(QUERY_SEARCH_DATA + suggestion);
+    const jsonSearchData = await searchData.json();
+    console.log("jsonSearchData", jsonSearchData);
   };
 
   return (
@@ -67,7 +72,7 @@ export const Head = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setShowSuggestions(false)}
+            // onBlur={() => setShowSuggestions(false)}
           />
           <button className="border border-gray-400 rounded-r-full bg-gray-100 px-5 py-2">
             🔍
@@ -75,9 +80,13 @@ export const Head = () => {
         </div>
         {showSuggestions && (
           <ul className="bg-white py-2 px-5 w-[36rem] shadow-lg rounded-lg border-gray-100 absolute">
-            {suggestions.map((s) => (
-              <li key={s} className="py-2 shadow-sm hover:bg-gray-100">
-                🔍 {s}
+            {suggestions.map((suggestion) => (
+              <li
+                key={suggestion}
+                className="py-2 shadow-sm hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleSearchSelect(suggestion)}
+              >
+                🔍 {suggestion}
               </li>
             ))}
           </ul>
