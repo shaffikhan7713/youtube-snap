@@ -2,14 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleMenu } from "../utils/appSlice";
 import { QUERY_SEARCH_DATA, VIDEO_SUGGESTION_URL } from "../utils/constants";
-import { cacheResults } from "../utils/searchSlice";
+import {
+  addGlobalSearchText,
+  addSearchVideos,
+  cacheResults,
+} from "../utils/searchSlice";
 
 export const Head = () => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchCache = useSelector((store) => store.search);
+  const searchCache = useSelector((store) => store.search.autoSuggestCacheData);
 
   const toggleHandler = () => {
     dispatch(toggleMenu());
@@ -30,22 +34,39 @@ export const Head = () => {
   }, [searchQuery]);
 
   const getAutosuggestResults = async () => {
-    const data = await fetch(VIDEO_SUGGESTION_URL + searchQuery);
-    const jsonData = await data.json();
-    setSuggestions(jsonData[1]);
+    if (searchQuery.trim() === "") return;
 
-    //update cache
-    dispatch(
-      cacheResults({
-        [searchQuery]: jsonData[1],
-      })
-    );
+    try {
+      const data = await fetch(VIDEO_SUGGESTION_URL + searchQuery);
+      const jsonData = await data.json();
+      console.log("jsonData", jsonData);
+      // setSuggestions(jsonData[1]);
+      setSuggestions(jsonData[1]);
+
+      //update cache
+      dispatch(
+        cacheResults({
+          [searchQuery]: jsonData[1],
+        })
+      );
+    } catch (error) {
+      console.log("ERROR", error);
+    }
   };
 
-  const handleSearchSelect = async (suggestion) => {
+  const handleSearchSelect = (suggestion) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+    dispatch(addGlobalSearchText(suggestion));
+    getQueryVideos(suggestion);
+  };
+
+  const getQueryVideos = async (suggestion) => {
+    if (!suggestion) return;
     const searchData = await fetch(QUERY_SEARCH_DATA + suggestion);
     const jsonSearchData = await searchData.json();
     console.log("jsonSearchData", jsonSearchData);
+    dispatch(addSearchVideos(jsonSearchData.items));
   };
 
   return (

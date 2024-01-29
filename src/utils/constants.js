@@ -10,6 +10,9 @@ export const QUERY_SEARCH_DATA =
   "&q=";
 
 export const VIDEO_SUGGESTION_URL =
-  "http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=";
+  "https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=";
+
+// export const VIDEO_SUGGESTION_URL =
+//   "https://serpapi.com/search.json?engine=google_autocomplete&api_key=acb4d9f4b082110a4b857beab73132159811e6dee52545f49296aec5fcef319f&q=";
 
 export const LIVE_CHAT_MSG_OFFSET = 10;
